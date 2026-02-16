@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "karendijital.click";
 
@@ -18,7 +17,7 @@ const protectedPaths = [
   "/settings",
 ];
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get("host") || "";
   const pathname = url.pathname;
@@ -46,8 +45,15 @@ export async function middleware(request: NextRequest) {
   // Dashboard routes - require auth
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
-  // Auth kontrolu gecici devre disi - debug
   if (isProtected) {
+    const sessionToken =
+      request.cookies.get("authjs.session-token")?.value ||
+      request.cookies.get("__Secure-authjs.session-token")?.value;
+
+    if (!sessionToken) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
     return NextResponse.next();
   }
 
