@@ -45,9 +45,7 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error("E-posta veya sifre hatali");
       } else {
-        toast.success("Giris basarili!");
-        router.push("/dashboard");
-        router.refresh();
+        window.location.href = "/dashboard";
       }
     } catch {
       toast.error("Bir hata olustu");
