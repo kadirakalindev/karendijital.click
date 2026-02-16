@@ -222,8 +222,8 @@ export default async function BusinessPublicPage({
             </CardContent>
           </Card>
 
-          <Button className="w-full" size="lg">
-            Online Randevu Al
+          <Button className="w-full" size="lg" asChild>
+            <a href={`/${domain}/randevu`}>Online Randevu Al</a>
           </Button>
         </div>
       </div>
