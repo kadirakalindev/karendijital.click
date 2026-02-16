@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "karendijital.click";
 
-export default async function middleware(request: NextRequest) {
+const protectedPaths = [
+  "/dashboard",
+  "/appointments",
+  "/customers",
+  "/services",
+  "/products",
+  "/packages",
+  "/staff",
+  "/invoices",
+  "/reports",
+  "/expenses",
+  "/settings",
+];
+
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get("host") || "";
   const pathname = url.pathname;
@@ -24,21 +38,21 @@ export default async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
-    pathname.includes(".") // static files
+    pathname.includes(".")
   ) {
     return NextResponse.next();
   }
 
   // Dashboard routes - require auth
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/appointments") ||
-      pathname.startsWith("/customers") || pathname.startsWith("/services") ||
-      pathname.startsWith("/products") || pathname.startsWith("/packages") ||
-      pathname.startsWith("/staff") || pathname.startsWith("/invoices") ||
-      pathname.startsWith("/reports") || pathname.startsWith("/expenses") ||
-      pathname.startsWith("/settings")) {
-    const session = await auth();
+  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
-    if (!session) {
+  if (isProtected) {
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET,
+    });
+
+    if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
