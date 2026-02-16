@@ -46,16 +46,8 @@ export async function middleware(request: NextRequest) {
   // Dashboard routes - require auth
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
+  // Auth kontrolu gecici devre disi - debug
   if (isProtected) {
-    const token = await getToken({
-      req: request,
-      secret: process.env.AUTH_SECRET,
-    });
-
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-
     return NextResponse.next();
   }
 
